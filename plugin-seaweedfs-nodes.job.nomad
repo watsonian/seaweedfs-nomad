@@ -10,9 +10,28 @@ job "plugin-seaweedfs-nodes" {
       config {
         image = "chrislusf/seaweedfs-csi-driver:latest"
 
+      template {
+        destination = "config/.env"
+        env = true
+        data = <<-EOF
+{{ range $i, $s := service "http.seaweedfs-master" }}
+{{- if eq $i 0 -}}
+SEAWEEDFS_FILER_IP_http={{ .Address }}
+SEAWEEDFS_FILER_PORT_http={{ .Port }}
+{{- end -}}
+{{ end }}
+{{ range $i, $s := service "grpc.seaweedfs-filer" }}
+{{- if eq $i 0 -}}
+SEAWEEDFS_FILER_IP_grpc={{ .Address }}
+SEAWEEDFS_FILER_PORT_grpc={{ .Port }}
+{{- end -}}
+{{ end }}
+EOF
+      }
+
         args = [
           "--endpoint=unix://csi/csi.sock",
-          "--filer=seaweedfs-filer.service.consul:3333",
+          "--filer=${SEAWEEDFS_FILER_IP_http}:${SEAWEEDFS_FILER_PORT_http}.${SEAWEEDFS_FILER_PORT_grpc}",
           "--nodeid=${node.unique.name}",
           "--cacheCapacityMB=1000",
           "--cacheDir=/tmp",
