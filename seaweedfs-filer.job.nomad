@@ -1,3 +1,12 @@
+variable "port" {
+  type = number
+  default = 8888
+}
+
+locals {
+  grpcPort = var.port + 10000
+}
+
 job "seaweedfs-filer" {
   datacenters = ["dc1"]
   type = "service"
@@ -6,9 +15,15 @@ job "seaweedfs-filer" {
     network {
       mode = "host"
 
-      port "http" {}
+      port "http" {
+        static = var.port
+        to = var.port
+      }
 
-      port "grpc" {}
+      port "grpc" {
+        static = local.grpcPort
+        to = local.grpcPort
+      }
     }
 
     volume "seaweedfs-filer" {
@@ -18,13 +33,13 @@ job "seaweedfs-filer" {
     }
 
     service {
-      tags = ["seaweedfs", "filer", "http"]
+      tags = ["http"]
       name = "seaweedfs-filer"
       port = "http"
     }
 
     service {
-      tags = ["seaweedfs", "filer", "grpc"]
+      tags = ["grpc"]
       name = "seaweedfs-filer"
       port = "grpc"
     }

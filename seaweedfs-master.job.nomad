@@ -1,3 +1,12 @@
+variable "port" {
+  type = number
+  default = 9333
+}
+
+locals {
+  grpcPort = var.port + 10000
+}
+
 job "seaweedfs-master" {
   datacenters = ["dc1"]
   type = "service"
@@ -6,9 +15,15 @@ job "seaweedfs-master" {
     network {
       mode = "host"
 
-      port "http" {}
+      port "http" {
+        static = var.port
+        to = var.port
+      }
 
-      port "grpc" {}
+      port "grpc" {
+        static = local.grpcPort
+        to = local.grpcPort
+      }
     }
 
     volume "seaweedfs-master" {
@@ -18,13 +33,13 @@ job "seaweedfs-master" {
     }
 
     service {
-      tags = ["${NOMAD_ALLOC_INDEX}", "seaweedfs", "master", "http"]
+      tags = ["http"]
       name = "seaweedfs-master"
       port = "http"
     }
 
     service {
-      tags = ["${NOMAD_ALLOC_INDEX}", "seaweedfs", "master", "grpc"]
+      tags = ["grpc"]
       name = "seaweedfs-master"
       port = "grpc"
     }
