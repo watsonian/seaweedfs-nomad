@@ -1,7 +1,13 @@
 job "seaweedfs-plugin" {
   datacenters = ["dc1"]
-
   type = "system"
+
+  # only one plugin of a given type and ID should be deployed on
+  # any given client node
+  constraint {
+    operator = "distinct_hosts"
+    value = true
+  }
 
   group "nodes" {
     task "plugin" {

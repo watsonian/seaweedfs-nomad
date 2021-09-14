@@ -62,6 +62,12 @@ SEAWEEDFS_MASTER_IP_http={{ .Address }}
 SEAWEEDFS_MASTER_PORT_http={{ .Port }}
 {{- end -}}
 {{ end }}
+{{ range $i, $s := service "grpc.seaweedfs-master" }}
+{{- if eq $i 0 -}}
+SEAWEEDFS_MASTER_IP_grpc={{ .Address }}
+SEAWEEDFS_MASTER_PORT_grpc={{ .Port }}
+{{- end -}}
+{{ end }}
 EOF
       }
 
@@ -77,10 +83,12 @@ EOF
         args = [
           "-logtostderr",
           "volume",
-          "-ip=${NOMAD_IP_http}",
-          "-ip.bind=0.0.0.0",
           "-mserver=${SEAWEEDFS_MASTER_IP_http}:${SEAWEEDFS_MASTER_PORT_http}.${SEAWEEDFS_MASTER_PORT_grpc}",
           "-dir=/data/${node.unique.name}",
+          "-max=0",
+          "-dataCenter=${node.datacenter}",
+          "-ip=${NOMAD_IP_http}",
+          "-ip.bind=0.0.0.0",
           "-port=${NOMAD_PORT_http}",
           "-port.grpc=${NOMAD_PORT_grpc}"
         ]

@@ -57,6 +57,12 @@ SEAWEEDFS_MASTER_IP_http={{ .Address }}
 SEAWEEDFS_MASTER_PORT_http={{ .Port }}
 {{- end -}}
 {{ end }}
+{{ range $i, $s := service "grpc.seaweedfs-master" }}
+{{- if eq $i 0 -}}
+SEAWEEDFS_MASTER_IP_grpc={{ .Address }}
+SEAWEEDFS_MASTER_PORT_grpc={{ .Port }}
+{{- end -}}
+{{ end }}
 EOF
       }
 
