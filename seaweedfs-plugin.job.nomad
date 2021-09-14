@@ -1,4 +1,4 @@
-job "plugin-seaweedfs-nodes" {
+job "seaweedfs-plugin" {
   datacenters = ["dc1"]
 
   type = "system"
@@ -7,14 +7,11 @@ job "plugin-seaweedfs-nodes" {
     task "plugin" {
       driver = "docker"
 
-      config {
-        image = "chrislusf/seaweedfs-csi-driver:latest"
-
       template {
         destination = "config/.env"
         env = true
         data = <<-EOF
-{{ range $i, $s := service "http.seaweedfs-master" }}
+{{ range $i, $s := service "http.seaweedfs-filer" }}
 {{- if eq $i 0 -}}
 SEAWEEDFS_FILER_IP_http={{ .Address }}
 SEAWEEDFS_FILER_PORT_http={{ .Port }}
@@ -29,6 +26,9 @@ SEAWEEDFS_FILER_PORT_grpc={{ .Port }}
 EOF
       }
 
+      config {
+        image = "chrislusf/seaweedfs-csi-driver"
+
         args = [
           "--endpoint=unix://csi/csi.sock",
           "--filer=${SEAWEEDFS_FILER_IP_http}:${SEAWEEDFS_FILER_PORT_http}.${SEAWEEDFS_FILER_PORT_grpc}",
@@ -42,7 +42,7 @@ EOF
 
       csi_plugin {
         id        = "seaweedfs"
-        type      = "node"
+        type      = "monolith"
         mount_dir = "/csi"
       }
     }
