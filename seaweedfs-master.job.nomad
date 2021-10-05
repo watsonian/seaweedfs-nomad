@@ -11,6 +11,11 @@ job "seaweedfs-master" {
   datacenters = ["dc1"]
   type = "service"
 
+  constraint {
+    operator = "distinct_hosts"
+    value = true
+  }
+
   group "master" {
     network {
       mode = "host"

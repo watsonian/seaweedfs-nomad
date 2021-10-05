@@ -11,6 +11,11 @@ job "seaweedfs-filer" {
   datacenters = ["dc1"]
   type = "service"
 
+  constraint {
+    operator = "distinct_hosts"
+    value = true
+  }
+
   group "filer" {
     network {
       mode = "host"
